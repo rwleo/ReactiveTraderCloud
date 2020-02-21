@@ -1,16 +1,16 @@
 import React from 'react'
 import { CurrencyPair, ServiceConnectionStatus } from 'rt-types'
-import { ExecuteTradeRequest, SpotTileDataWithNotional } from '../model'
+import { ExecuteTradeRequest, SpotTileData } from '../model'
 import NotificationContainer from './notifications'
 import Tile from './Tile'
 import TileControls from './TileControls'
-import { TileViews } from '../../workspace/workspaceHeader'
+import { TileView } from '../../workspace/workspaceHeader'
 import { RfqActions, TradingMode } from './types'
 import { CurrencyPairNotional } from '../model/spotTileData'
 
 interface Props {
   currencyPair?: CurrencyPair
-  spotTileData: SpotTileDataWithNotional
+  spotTileData: SpotTileData
   canPopout: boolean
   executionStatus: ServiceConnectionStatus
   executeTrade: (tradeRequestObj: ExecuteTradeRequest) => void
@@ -18,7 +18,7 @@ interface Props {
   onNotificationDismissed: () => void
   displayCurrencyChart?: () => void
   setTradingMode: (tradingMode: TradingMode) => void
-  tileView?: TileViews
+  tileView?: TileView
   rfq: RfqActions
   updateNotional: (currencyPairNotional: CurrencyPairNotional) => void
 }
@@ -52,6 +52,7 @@ const TileSwitch: React.FC<Props> = ({
       rfq={rfq}
       displayCurrencyChart={displayCurrencyChart}
       updateNotional={updateNotional}
+      canPopout={canPopout}
     >
       {() => (
         <>

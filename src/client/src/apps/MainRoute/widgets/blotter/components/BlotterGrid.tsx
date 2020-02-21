@@ -23,12 +23,16 @@ export default styled('div')`
     background-color: ${({ theme }) => theme.core.alternateBackground};
   }
 
+  .ag-row-no-animation .ag-row {
+    transition: background-color 0.2s ease;
+  }
+
   .rt-blotter__row-pending {
     background-color: ${({ theme }) => theme.core.offBackground};
   }
 
   .rt-blotter__row-highlight {
-    animation: ${({ theme }) => theme.flash} 1s ease-in-out 0s infinite;
+    animation: ${({ theme }) => theme.flash} 1s ease-in-out 3;
   }
 
   .rt-blotter__status-indicator--done {

@@ -1,51 +1,53 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
 import { LaunchButton } from './LaunchButton'
 import { LauncherApps } from './LauncherApps'
-import { AdaptiveLoader, LogoIcon } from 'rt-components'
-import { ThemeStorageSwitch } from 'rt-theme'
+import { AdaptiveLoader, LogoIcon, Tooltip } from 'rt-components'
 import { Bounds } from 'openfin/_v2/shapes'
 import SearchIcon from './icons/searchIcon'
 import {
-  ButtonContainer,
   HorizontalContainer,
-  IconTitle,
   LauncherGlobalStyle,
-  LogoContainer,
-  RootContainer,
-  ThemeSwitchContainer
+  MinExitContainer,
+  ExitButton,
+  MinimiseButton,
+  LogoLauncherContainer,
+  RootLauncherContainer,
+  LauncherContainer,
+  SearchButtonContainer,
 } from './styles'
-import { animateCurrentWindowSize, closeCurrentWindow, getCurrentWindowBounds } from './windowUtils';
+import {
+  animateCurrentWindowSize,
+  closeCurrentWindow,
+  getCurrentWindowBounds,
+  minimiseCurrentWindow,
+} from './windowUtils'
 import Measure, { ContentRect } from 'react-measure'
-import { SearchControl, SearchState } from './spotlight';
+import { SearchControl, SearchState } from './spotlight'
+import { exitNormalIcon, minimiseNormalIcon } from './icons'
 
-library.add(faSignOutAlt)
-
-const LauncherExit: React.FC = () => (
-  <ButtonContainer key="exit">
-    <LaunchButton onClick={closeCurrentWindow}>
-      <FontAwesomeIcon icon="sign-out-alt"/>
-      <IconTitle>Exit</IconTitle>
-    </LaunchButton>
-  </ButtonContainer>
+const LauncherMinimiseAndExit: React.FC = () => (
+  <>
+    <ExitButton onClick={closeCurrentWindow}>{exitNormalIcon}</ExitButton>
+    <MinimiseButton onClick={minimiseCurrentWindow}>{minimiseNormalIcon}</MinimiseButton>
+  </>
 )
 
-const SearchButton: React.FC<{ onClick: () => void }> = ({onClick}) => (
-  <ButtonContainer>
-    <LaunchButton onClick={onClick}>{SearchIcon}</LaunchButton>
-  </ButtonContainer>
+const SearchButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <SearchButtonContainer>
+    <Tooltip message="Search ecosystem">
+      <LaunchButton onClick={onClick}>{SearchIcon}</LaunchButton>
+    </Tooltip>
+  </SearchButtonContainer>
 )
 
-const DynamicLogo: React.FC<{ isMoving: boolean }> = ({isMoving}) => (
-  <LogoContainer>
-    {
-      isMoving ?
-        <AdaptiveLoader size={23} speed={isMoving ? 0.8 : 0} seperation={1} type="secondary"/> :
-        <LogoIcon width={1.4} height={1.4}/>
-    }
-  </LogoContainer>
+const DynamicLogo: React.FC<{ isMoving: boolean }> = ({ isMoving }) => (
+  <LogoLauncherContainer>
+    {isMoving ? (
+      <AdaptiveLoader size={21} speed={isMoving ? 0.8 : 0} seperation={1} type="secondary" />
+    ) : (
+      <LogoIcon width={1.2} height={1.2} />
+    )}
+  </LogoLauncherContainer>
 )
 
 export const Launcher: React.FC = () => {
@@ -55,45 +57,39 @@ export const Launcher: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    getCurrentWindowBounds().then(setInitialBounds)
+    getCurrentWindowBounds()
+      .then(setInitialBounds)
+      .catch(console.error)
   }, [])
 
-  const showSearch = useCallback(
-    () => {
-      if (isSearchVisible) {
-        searchInputRef.current && searchInputRef.current.focus({preventScroll: true})
-      }
-      setIsSearchVisible(true)
-    },
-    [isSearchVisible]
-  );
+  const showSearch = useCallback(() => {
+    if (isSearchVisible) {
+      searchInputRef.current && searchInputRef.current.focus({ preventScroll: true })
+    }
+    setIsSearchVisible(true)
+  }, [isSearchVisible])
 
   // if search is made visible - focus on it
-  useEffect(
-    () => {
-      if (isSearchVisible) {
-        searchInputRef.current && searchInputRef.current.focus({preventScroll: true})
-      }
-    },
-    [isSearchVisible]
-  )
+  useEffect(() => {
+    if (isSearchVisible) {
+      searchInputRef.current && searchInputRef.current.focus({ preventScroll: true })
+    }
+  }, [isSearchVisible])
 
   // hide search if Escape is pressed
-  useEffect(
-    () => {
-      const onKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-          setIsSearchVisible(false)
-        }
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsSearchVisible(false)
       }
-      document.addEventListener('keydown', onKeyDown)
-      return () => document.removeEventListener('keydown', onKeyDown)
-    }, []
-  )
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   const handleSearchStateChange = useCallback(
     (state: SearchState) => setIsSearchBusy(state.typing || state.loading),
-    []
+    [],
   )
 
   const handleSearchSizeChange = useCallback(
@@ -103,39 +99,35 @@ export const Launcher: React.FC = () => {
       }
       animateCurrentWindowSize({
         ...initialBounds,
-        height: initialBounds.height + (contentRect.bounds ? contentRect.bounds.height : 0)
+        height: initialBounds.height + (contentRect.bounds ? contentRect.bounds.height : 0),
       })
     },
-    [initialBounds]
+    [initialBounds],
   )
 
   return (
-    <RootContainer>
-      <LauncherGlobalStyle/>
-      <HorizontalContainer>
-        <DynamicLogo isMoving={isSearchBusy}/>
-        <SearchButton onClick={showSearch}/>
-        <LauncherApps/>
-        <LauncherExit/>
-        <ThemeSwitchContainer>
-          <ThemeStorageSwitch/>
-        </ThemeSwitchContainer>
-      </HorizontalContainer>
+    <RootLauncherContainer>
+      <LauncherContainer>
+        <LauncherGlobalStyle />
+        <HorizontalContainer>
+          <DynamicLogo isMoving={isSearchBusy} />
+          <LauncherApps />
+          <SearchButton onClick={showSearch} />
+          <MinExitContainer>
+            <LauncherMinimiseAndExit />
+          </MinExitContainer>
+        </HorizontalContainer>
 
-      <Measure
-        bounds
-        onResize={handleSearchSizeChange}>
-        {({measureRef}) => (
-          <div ref={measureRef}>
-            {isSearchVisible && (
-              <SearchControl
-                ref={searchInputRef}
-                onStateChange={handleSearchStateChange}/>
-            )}
-          </div>
-        )}
-      </Measure>
-
-    </RootContainer>
+        <Measure bounds onResize={handleSearchSizeChange}>
+          {({ measureRef }) => (
+            <div ref={measureRef}>
+              {isSearchVisible && (
+                <SearchControl ref={searchInputRef} onStateChange={handleSearchStateChange} />
+              )}
+            </div>
+          )}
+        </Measure>
+      </LauncherContainer>
+    </RootLauncherContainer>
   )
 }

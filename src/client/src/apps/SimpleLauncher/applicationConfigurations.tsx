@@ -1,11 +1,11 @@
+import { EXCEL_ADAPTER_NAME, PlatformName } from 'rt-platforms'
+import { getEnvironment } from 'rt-util'
 import {
   excelIcon,
   limitCheckerIcon,
   reactiveAnalyticsIcon,
   reactiveTraderIcon,
 } from './icons/index'
-import { EXCEL_ADAPTER_NAME, PlatformName } from 'rt-platforms'
-import { getEnvironment } from 'rt-util/getEnvironment'
 
 // Safer than location.origin due to browser support
 const ORIGIN = `${location.protocol}//${location.host}`
@@ -53,14 +53,19 @@ export interface ApplicationProvider {
 
 export interface ApplicationConfig {
   name: string
+  displayName: string
+  tooltipName?: string
   uuid?: string
   url?: string
   icon: JSX.Element
+  iconhovercolor?: string
   provider?: ApplicationProvider
 }
 
 const excelJSAppConfig: ApplicationConfig = {
   name: 'Excel',
+  displayName: 'EX',
+  tooltipName: 'Launch Excel',
   icon: excelIcon,
   provider: {
     platformName: 'openfin',
@@ -74,6 +79,8 @@ const excelJSAppConfig: ApplicationConfig = {
 
 const excelLegacyAppConfig: ApplicationConfig = {
   name: 'Excel',
+  displayName: 'EX',
+  tooltipName: 'Launch Excel',
   icon: excelIcon,
   url: `${ORIGIN}/static/excel/instructions.html`,
   provider: {
@@ -94,12 +101,17 @@ const excelLegacyAppConfig: ApplicationConfig = {
 
 const excelAppConfig = EXCEL_ADAPTER_NAME === 'JS' ? excelJSAppConfig : excelLegacyAppConfig
 
+const prodEnvs = ['demo']
 const env = getEnvironment() || 'unknown'
-const envFormatted = `(${env.toUpperCase()})`
+const envFormatted = prodEnvs.includes(env) ? '' : `(${env.toUpperCase()})`
+
+console.log(envFormatted)
 
 const baseAppConfigs: ApplicationConfig[] = [
   {
-    name: `Reactive Trader Cloud (${envFormatted})`,
+    name: `Reactive Trader Cloud ${envFormatted}`,
+    displayName: 'RT',
+    tooltipName: 'Launch Reactive Trader',
     uuid: `reactive-trader-cloud-web-${env}`,
     url: `${ORIGIN}`,
     icon: reactiveTraderIcon,
@@ -115,20 +127,25 @@ const baseAppConfigs: ApplicationConfig[] = [
   },
   {
     name: 'Reactive Analytics',
+    displayName: 'RA',
+    tooltipName: 'Launch Reactive Analytics',
     url: `http://${env === 'dev' ? env : 'demo'}-reactive-analytics.adaptivecluster.com/`,
     icon: reactiveAnalyticsIcon,
+    iconhovercolor: '#AAABD1',
     provider: {
       platformName: 'openfin',
       applicationType: 'application',
       windowOptions: {
         ...defaultWindowOptions,
         frame: false,
-        icon: `${ORIGIN}/static/media/ra-icon.ico`,
+        icon: `${ORIGIN}/static/media/ra-icon-color.ico`,
       },
     },
   },
   {
     name: 'Limit Checker',
+    displayName: 'LC',
+    tooltipName: 'Launch Limit Checker',
     icon: limitCheckerIcon,
     provider: {
       platformName: 'openfin',

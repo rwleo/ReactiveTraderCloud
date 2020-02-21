@@ -1,9 +1,9 @@
 import React from 'react'
 import { styled } from 'rt-theme'
 
-const StyledButton = styled.button`
-  width: 100%;
-  height: 100%;
+const StyledButton = styled.button<{ fill?: string }>`
+  width: 40px;
+  height: 45px;
   font-size: 1.5rem;
   text-align: center;
   display: flex;
@@ -15,9 +15,7 @@ const StyledButton = styled.button`
   z-index: 100;
 
   border-radius: 4px;
-  border: 0.5px solid ${({ theme }) => theme.core.darkBackground};
-
-  background-color: ${({ theme }) => theme.core.alternateBackground};
+  background-color: #313131;
 
   .svg-fill {
     fill: ${({ theme }) => theme.core.textColor};
@@ -28,20 +26,26 @@ const StyledButton = styled.button`
   }
 
   &:hover {
-    background-color: ${({ theme }) => theme.button.dominant.backgroundColor};
+    background-color: #2b2b2b;
     svg {
       transition-timing-function: ease-out;
       transition: transform 0.3s;
       transform: translateY(-20%);
+      [fill] {
+        fill: ${({ fill }) => fill || 'inherited'};
+      }
     }
   }
 `
 
 interface LaunchButtonProps {
   onClick: () => void
+  fill?: string
   children: JSX.Element[] | JSX.Element
 }
 
 export const LaunchButton = (props: LaunchButtonProps) => (
-  <StyledButton onClick={props.onClick}>{props.children}</StyledButton>
+  <StyledButton onClick={props.onClick} fill={props.fill}>
+    {props.children}
+  </StyledButton>
 )

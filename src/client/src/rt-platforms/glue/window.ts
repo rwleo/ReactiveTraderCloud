@@ -1,14 +1,15 @@
-import { Glue42 as GlueInterface } from '@glue42/desktop'
-import { GDObject } from '@glue42/core'
+import { Glue42 } from '@glue42/desktop'
+import { Glue42Core } from '@glue42/core'
 import _ from 'lodash'
 import { WindowConfig } from '../types'
 import { frameButtonBase64 } from './utils/frameButtonImage'
 import { CanvasAPI } from './canvas'
 
 type BrowserWindowProps = WindowConfig
-type GDWindow = GlueInterface.Windows.GDWindow
-type RelativeDirection = GlueInterface.Windows.RelativeDirection
-type ButtonInfo = GlueInterface.Windows.ButtonInfo
+type GDWindow = Glue42.Windows.GDWindow
+type RelativeDirection = Glue42.Windows.RelativeDirection
+type ButtonInfo = Glue42.Windows.ButtonInfo
+type GDObject = Glue42Core.GDObject
 
 let listOfOpenedWindows: GDWindow[] = []
 
@@ -54,10 +55,9 @@ export const registerWindowMethods = () => {
 
   window.glue.interop.register('openWorkspace', (args: { symbol: string }) => {
     // canvas typings are currently external
-    ;(window.glue42gd as GDObject & { canvas: CanvasAPI }).canvas.openWorkspace(
-      'Reactive Trader Workspace',
-      { context: args },
-    )
+    ;(window.glue42gd as GDObject & {
+      canvas: CanvasAPI
+    }).canvas.openWorkspace('Reactive Trader Workspace', { context: args })
   })
 
   window.glue.windows.onWindowRemoved((removedWnd: GDWindow) => {
@@ -79,7 +79,7 @@ export const openGlueWindow = async (config: BrowserWindowProps, onClose?: () =>
     relativeTo,
     relativeDirection,
   } = calculatePosition(myWindow, width, height, url)
-  const fullUrl = `${location.href.slice(0, -1)}${url}`
+  const fullUrl = `${location.origin}${url}`
   const isTabWindow = isSpot(url)
 
   const win = await window.glue.windows.open(name, fullUrl, {

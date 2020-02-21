@@ -1,14 +1,9 @@
 import React from 'react'
 import { CurrencyPair, Direction, ServiceConnectionStatus } from 'rt-types'
-import {
-  createTradeRequest,
-  ExecuteTradeRequest,
-  SpotTileDataWithNotional,
-  TradeRequest,
-} from '../../model'
+import { createTradeRequest, ExecuteTradeRequest, SpotTileData, TradeRequest } from '../../model'
 import SpotTile from '../SpotTile'
 import { AnalyticsTile } from '../analyticsTile/index'
-import { TileViews } from '../../../workspace/workspaceHeader'
+import { TileView } from '../../../workspace/workspaceHeader'
 import { RfqActions, TradingMode } from '../types'
 import { ValidationMessage } from '../notional'
 import {
@@ -22,15 +17,16 @@ import { CurrencyPairNotional } from '../../model/spotTileData'
 
 export interface TileProps {
   currencyPair: CurrencyPair
-  spotTileData: SpotTileDataWithNotional
+  spotTileData: SpotTileData
   executionStatus: ServiceConnectionStatus
   executeTrade: (tradeRequestObj: ExecuteTradeRequest) => void
   setTradingMode: (tradingMode: TradingMode) => void
   displayCurrencyChart?: () => void
-  tileView?: TileViews
+  tileView?: TileView
   children: () => JSX.Element
   rfq: RfqActions
   updateNotional: (notionalUpdate: CurrencyPairNotional) => void
+  canPopout?: boolean
 }
 
 export interface TileState {
@@ -47,8 +43,8 @@ class Tile extends React.PureComponent<TileProps, TileState> {
   }
 
   tileComponents = {
-    [TileViews.Normal]: SpotTile,
-    [TileViews.Analytics]: AnalyticsTile,
+    [TileView.Normal]: SpotTile,
+    [TileView.Analytics]: AnalyticsTile,
   }
 
   // State management derived from props
@@ -67,10 +63,13 @@ class Tile extends React.PureComponent<TileProps, TileState> {
   // be in the RFQ range.
   componentDidMount() {
     const {
-      spotTileData: { notional, rfqState },
+      spotTileData: { rfqState, notional: spotTileNotional },
       setTradingMode,
-      currencyPair: { symbol },
+      currencyPair,
     } = this.props
+    const { symbol } = currencyPair
+    const notional =
+      spotTileNotional !== undefined ? spotTileNotional : getDefaultNotionalValue(currencyPair)
     const { isRfqStateNone } = getConstsFromRfqState(rfqState)
 
     if (isRfqStateNone && isValueInRfqRange(notional)) {
@@ -83,8 +82,11 @@ class Tile extends React.PureComponent<TileProps, TileState> {
       currencyPair,
       executeTrade,
       rfq,
-      spotTileData: { notional, rfqState },
+      spotTileData: { rfqState, notional: spotTileNotional },
     } = this.props
+    const notional =
+      spotTileNotional !== undefined ? spotTileNotional : getDefaultNotionalValue(currencyPair)
+
     const { isRfqStateReceived } = getConstsFromRfqState(rfqState)
     if (typeof notional === 'undefined') {
       console.error(`Error executing trade with no notional`)
@@ -137,15 +139,10 @@ class Tile extends React.PureComponent<TileProps, TileState> {
       tileView,
       rfq,
       displayCurrencyChart,
+      canPopout,
     } = this.props
     const { inputDisabled, inputValidationMessage, canExecute } = this.state
-    const { rfqState } = spotTileData
-    const { isRfqStateCanRequest, isRfqStateNone } = getConstsFromRfqState(rfqState)
-
-    const TileViewComponent =
-      tileView && (isRfqStateNone || isRfqStateCanRequest)
-        ? this.tileComponents[tileView]
-        : SpotTile
+    const TileViewComponent = tileView ? this.tileComponents[tileView] : SpotTile
 
     return (
       <TileViewComponent
@@ -160,6 +157,7 @@ class Tile extends React.PureComponent<TileProps, TileState> {
         tradingDisabled={!canExecute}
         rfq={rfq}
         displayCurrencyChart={displayCurrencyChart}
+        canPopout={canPopout}
       >
         {children()}
       </TileViewComponent>

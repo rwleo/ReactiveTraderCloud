@@ -3,7 +3,6 @@ import { platformHasFeature, usePlatform } from 'rt-platforms'
 import { styled } from 'rt-theme'
 import { TileHeader as Header, TileSymbol, DeliveryDate } from './styled'
 import { CurrencyPair } from 'rt-types'
-
 interface Props {
   ccyPair: CurrencyPair
   date: string
@@ -41,4 +40,4 @@ const TileHeader: React.FC<Props> = ({ ccyPair, date, displayCurrencyChart }) =>
   )
 }
 
-export default TileHeader
+export default React.memo(TileHeader)

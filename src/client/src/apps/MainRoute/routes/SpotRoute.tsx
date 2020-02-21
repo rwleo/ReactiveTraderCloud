@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import queryString from 'query-string'
 import { RouteComponentProps } from 'react-router-dom'
 import SpotTileContainer from '../widgets/spotTile/SpotTileContainer'
-import { TileViews } from '../widgets/workspace/workspaceHeader'
+import { TileView } from '../widgets/workspace/workspaceHeader'
 import { styled } from 'rt-theme'
 import { InteropTopics, platformHasFeature, usePlatform } from 'rt-platforms'
 import { Subscription } from 'rxjs'
@@ -10,20 +10,20 @@ import { Subscription } from 'rxjs'
 const SpotTileStyle = styled.div`
   min-width: 26rem;
   width: 26rem;
-  min-height: 12rem;
-  height: 12rem;
-  padding: 0.625rem;
+  min-height: 12.2rem;
+  height: 12.2rem;
+  padding: 0 0.575rem 0.5rem 0.575rem;
   margin: 0 auto;
 `
 
-const getTileViewFromQueryStr: (queryStr: string) => TileViews = queryStr => {
+const getTileViewFromQueryStr: (queryStr: string) => TileView = queryStr => {
   const parsedQueryString = queryString.parse(queryStr)
-  const tileView = parsedQueryString['tileView'] as TileViews
+  const tileView = parsedQueryString['tileView'] as TileView
   return !tileView
-    ? TileViews.Normal
-    : Object.values(TileViews).includes(tileView)
+    ? TileView.Normal
+    : Object.values(TileView).includes(tileView)
     ? tileView
-    : TileViews.Normal
+    : TileView.Normal
 }
 
 const SpotRoute: React.FC<RouteComponentProps<{ symbol: string }>> = ({
